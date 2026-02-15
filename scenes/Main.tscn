@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cmain000001"]
+[gd_scene load_steps=8 format=3 uid="uid://cmain000001"]
 
 [ext_resource type="Script" path="res://scripts/GridManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="2"]
@@ -6,8 +6,12 @@
 [ext_resource type="Script" path="res://scripts/EnemyManager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/UIManager.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/Hero.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/CameraController.gd" id="7"]
 
 [node name="Main" type="Node2D"]
+
+[node name="Camera" type="Camera2D" parent="."]
+script = ExtResource("7")
 
 [node name="GridManager" type="Node2D" parent="."]
 script = ExtResource("1")
@@ -148,6 +152,12 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Remove Tool  (50% refund)"
 tooltip_text = "Remove a placed structure"
+
+[node name="UpgradeButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Upgrade Tool"
+tooltip_text = "Upgrade a tower or archer (3 levels)"
 
 [node name="HSeparator3" type="HSeparator" parent="UIManager/BuildPanel/VBox"]
 layout_mode = 2
@@ -371,5 +381,5 @@ grow_vertical = 0
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 10
 text = "WASD: Move Hero | Space: Attack | Tab: Build Menu | Esc: Pause
-Click: Place | Right Click: Cancel | Enter: Start Wave
+Click: Place | RClick: Cancel | Enter: Start Wave | Scroll: Zoom | MClick: Pan
 Controller: LStick Move, RStick Cursor, A Place, X Attack, Y Build"

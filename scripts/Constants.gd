@@ -19,7 +19,7 @@ const REFUND_RATIO: float = 0.5
 const FINAL_WAVE: int = 10
 
 # ── Build Items ──
-enum BuildItem { NONE, WALL, ROCK, ARCHER_TOWER, GROUND_ARCHER, REMOVE }
+enum BuildItem { NONE, WALL, ROCK, ARCHER_TOWER, GROUND_ARCHER, REMOVE, UPGRADE }
 
 const BUILD_DATA := {
 	BuildItem.WALL: {
@@ -67,27 +67,53 @@ const GROUND_ARCHER_STATS := {
 	"projectile_speed": 250.0,
 }
 
+# ── Upgrade System ──
+const MAX_UPGRADE_LEVEL := 3
+const UPGRADE_COST_RATIO := [0.0, 0.6, 1.0]  # ratio of base cost to upgrade TO level 2, 3
+const UPGRADE_DAMAGE_MULT := [1.0, 1.35, 1.8]
+const UPGRADE_RANGE_MULT := [1.0, 1.15, 1.3]
+const UPGRADE_RATE_MULT := [1.0, 1.15, 1.3]
+
+static func get_upgrade_cost(item_type: int, current_level: int) -> int:
+	if current_level >= MAX_UPGRADE_LEVEL:
+		return 0
+	if not BUILD_DATA.has(item_type):
+		return 0
+	return int(BUILD_DATA[item_type]["cost"] * UPGRADE_COST_RATIO[current_level])
+
 # ── Hero Stats ──
 const HERO_SPEED: float = 150.0
 const HERO_ATTACK_DAMAGE: int = 25
 const HERO_ATTACK_COOLDOWN: float = 0.4
 const HERO_ATTACK_RANGE: float = 40.0
 
+# ── Enemy Types ──
+const ENEMY_TYPES := {
+	"goblin": {"hp_mult": 1.0, "speed_mult": 1.0, "damage": 1, "gold_mult": 1.0, "sprite": "res://assets/enemy.png"},
+	"orc":    {"hp_mult": 2.5, "speed_mult": 0.65, "damage": 2, "gold_mult": 1.5, "sprite": "res://assets/enemy_orc.png"},
+	"swift":  {"hp_mult": 0.5, "speed_mult": 1.8, "damage": 1, "gold_mult": 1.2, "sprite": "res://assets/enemy_swift.png"},
+	"demon":  {"hp_mult": 5.0, "speed_mult": 0.5, "damage": 3, "gold_mult": 3.0, "sprite": "res://assets/enemy_demon.png"},
+}
+
 # ── Enemy Stats (base, scaled per wave) ──
 const ENEMY_BASE_HP: int = 40
 const ENEMY_BASE_SPEED: float = 60.0
-const ENEMY_DAMAGE_TO_BASE: int = 1
 const ENEMY_HP_SCALE_PER_WAVE: float = 0.3   # +30% HP per wave
 const ENEMY_SPEED_SCALE_PER_WAVE: float = 0.05
 const ENEMY_SPAWN_INTERVAL: float = 0.7
 
 # ── Wave Config ──
 const WAVE_CONFIGS := [
-	{"count": 10},
-	{"count": 15},
-	{"count": 20},
-	{"count": 25},
-	{"count": 30},
+	{"count": 10, "types": ["goblin"]},
+	{"count": 12, "types": ["goblin", "goblin", "swift"]},
+	{"count": 15, "types": ["goblin", "swift", "orc"]},
+	{"count": 18, "types": ["goblin", "swift", "orc", "orc"]},
+	{"count": 20, "types": ["swift", "orc", "orc"]},
+	{"count": 22, "types": ["goblin", "swift", "orc", "demon"]},
+	{"count": 25, "types": ["swift", "orc", "demon"]},
+	{"count": 28, "types": ["orc", "orc", "demon", "demon"]},
+	{"count": 32, "types": ["swift", "swift", "orc", "demon"]},
+	{"count": 35, "types": ["orc", "demon", "demon", "demon"]},
 ]
 
 static func get_wave_config(wave: int) -> Dictionary:
@@ -95,7 +121,10 @@ static func get_wave_config(wave: int) -> Dictionary:
 		return WAVE_CONFIGS[wave - 1]
 	# Scale infinitely beyond defined waves
 	var base_count: int = WAVE_CONFIGS[-1]["count"]
-	return {"count": base_count + (wave - WAVE_CONFIGS.size()) * 5}
+	return {
+		"count": base_count + (wave - WAVE_CONFIGS.size()) * 5,
+		"types": ["orc", "swift", "demon", "demon"],
+	}
 
 # ── Coordinate Conversion ──
 static func grid_to_world(gx: int, gy: int) -> Vector2:

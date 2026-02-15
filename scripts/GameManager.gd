@@ -68,18 +68,18 @@ func start_wave() -> void:
 	enemies_remaining_changed.emit(enemies_remaining)
 	enemy_manager.start_wave(current_wave, config["count"])
 
-func on_enemy_killed() -> void:
+func on_enemy_killed(gold_mult: float = 1.0) -> void:
 	enemies_remaining -= 1
 	enemies_remaining_changed.emit(enemies_remaining)
-	# Gold reward per kill
-	gold += 5 + current_wave * 2
+	# Gold reward per kill (scaled by enemy type)
+	gold += int((5 + current_wave * 2) * gold_mult)
 	gold_changed.emit(gold)
 	AudioManager.play("gold_earned")
 	if enemies_remaining <= 0 and enemy_manager.all_spawned:
 		_wave_complete()
 
-func on_enemy_reached_goal() -> void:
-	base_hp -= Constants.ENEMY_DAMAGE_TO_BASE
+func on_enemy_reached_goal(damage: int = 1) -> void:
+	base_hp -= damage
 	base_hp_changed.emit(base_hp)
 	enemies_remaining -= 1
 	enemies_remaining_changed.emit(enemies_remaining)

@@ -30,6 +30,7 @@ extends CanvasLayer
 @onready var tower_btn: Button = %TowerButton
 @onready var archer_btn: Button = %ArcherButton
 @onready var remove_btn: Button = %RemoveButton
+@onready var upgrade_btn: Button = %UpgradeButton
 
 var _message_timer: float = 0.0
 var _build_panel_visible: bool = false
@@ -45,6 +46,7 @@ func _ready() -> void:
 	build_manager.placement_failed.connect(_show_message)
 	build_manager.item_placed.connect(func(_i, _p): _show_message("Placed!"))
 	build_manager.item_removed.connect(func(_p): _show_message("Removed (gold refunded)"))
+	build_manager.item_upgraded.connect(func(_p, lvl): _show_message("Upgraded to Lv.%d!" % lvl))
 	build_manager.item_selected.connect(_on_item_selected)
 
 	# Build buttons
@@ -53,6 +55,7 @@ func _ready() -> void:
 	tower_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.ARCHER_TOWER))
 	archer_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.GROUND_ARCHER))
 	remove_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.REMOVE))
+	upgrade_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.UPGRADE))
 	start_wave_btn.pressed.connect(func(): game_manager.start_wave_early())
 
 	# Break panel buttons
@@ -162,12 +165,14 @@ func _on_item_selected(item: int) -> void:
 	tower_btn.modulate = Color.WHITE
 	archer_btn.modulate = Color.WHITE
 	remove_btn.modulate = Color.WHITE
+	upgrade_btn.modulate = Color.WHITE
 	match item:
 		Constants.BuildItem.WALL: wall_btn.modulate = Color.YELLOW
 		Constants.BuildItem.ROCK: rock_btn.modulate = Color.YELLOW
 		Constants.BuildItem.ARCHER_TOWER: tower_btn.modulate = Color.YELLOW
 		Constants.BuildItem.GROUND_ARCHER: archer_btn.modulate = Color.YELLOW
 		Constants.BuildItem.REMOVE: remove_btn.modulate = Color(1, 0.5, 0.5)
+		Constants.BuildItem.UPGRADE: upgrade_btn.modulate = Color(0.5, 1, 0.5)
 
 func _update_button_affordability() -> void:
 	var g := game_manager.gold
