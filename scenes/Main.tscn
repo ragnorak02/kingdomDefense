@@ -1,0 +1,375 @@
+[gd_scene load_steps=7 format=3 uid="uid://cmain000001"]
+
+[ext_resource type="Script" path="res://scripts/GridManager.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/GameManager.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/BuildManager.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/EnemyManager.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/UIManager.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/Hero.gd" id="6"]
+
+[node name="Main" type="Node2D"]
+
+[node name="GridManager" type="Node2D" parent="."]
+script = ExtResource("1")
+
+[node name="Structures" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Projectiles" type="Node2D" parent="."]
+
+[node name="Hero" type="Node2D" parent="."]
+position = Vector2(640, 360)
+script = ExtResource("6")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="BuildManager" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="EnemyManager" type="Node" parent="."]
+script = ExtResource("4")
+
+[node name="UIManager" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("5")
+
+[node name="TopBar" type="HBoxContainer" parent="UIManager"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 36.0
+grow_horizontal = 2
+theme_override_constants/separation = 20
+
+[node name="PanelContainer" type="PanelContainer" parent="UIManager/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBox" type="HBoxContainer" parent="UIManager/TopBar/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="PhaseLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "PLANNING PHASE"
+
+[node name="GoldLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "Gold: 300"
+
+[node name="WaveLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Wave: --"
+
+[node name="TimerLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Plan: 30s"
+
+[node name="EnemiesLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 14
+text = "Enemies: 0"
+
+[node name="BaseHPLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 14
+text = "Base: 20/20"
+
+[node name="BuildPanel" type="PanelContainer" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -320.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="UIManager/BuildPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="UIManager/BuildPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "BUILD MENU [Tab]"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UIManager/BuildPanel/VBox"]
+layout_mode = 2
+
+[node name="WallButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Wall  (10g)"
+tooltip_text = "Stone wall - blocks enemy paths"
+
+[node name="RockButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rock  (20g)"
+tooltip_text = "Large boulder - sturdy blockade"
+
+[node name="TowerButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Archer Tower  (80g)"
+tooltip_text = "Tower with archer - long range"
+
+[node name="ArcherButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ground Archer  (40g)"
+tooltip_text = "Archer on foot - medium range"
+
+[node name="HSeparator2" type="HSeparator" parent="UIManager/BuildPanel/VBox"]
+layout_mode = 2
+
+[node name="RemoveButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Remove Tool  (50% refund)"
+tooltip_text = "Remove a placed structure"
+
+[node name="HSeparator3" type="HSeparator" parent="UIManager/BuildPanel/VBox"]
+layout_mode = 2
+
+[node name="StartWaveButton" type="Button" parent="UIManager/BuildPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.2, 1)
+text = "Start Wave [Enter]"
+tooltip_text = "Start wave early for bonus gold"
+
+[node name="MessageLabel" type="Label" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -50.0
+offset_right = 200.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = ""
+horizontal_alignment = 1
+
+[node name="BreakPanel" type="PanelContainer" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -120.0
+offset_right = 150.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="UIManager/BreakPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="BreakWaveLabel" type="Label" parent="UIManager/BreakPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+text = "Wave 1 Cleared!"
+horizontal_alignment = 1
+
+[node name="BreakGoldLabel" type="Label" parent="UIManager/BreakPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Gold: 300"
+horizontal_alignment = 1
+
+[node name="BreakHPLabel" type="Label" parent="UIManager/BreakPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Base HP: 20/20"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="UIManager/BreakPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Continue"
+
+[node name="GameOverPanel" type="PanelContainer" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -100.0
+offset_right = 150.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="UIManager/GameOverPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="DefeatLabel" type="Label" parent="UIManager/GameOverPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.15, 0.15, 1)
+theme_override_font_sizes/font_size = 28
+text = "DEFEAT"
+horizontal_alignment = 1
+
+[node name="WaveReachedLabel" type="Label" parent="UIManager/GameOverPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "You survived to this wave"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="UIManager/GameOverPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Restart"
+
+[node name="PausePanel" type="PanelContainer" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -80.0
+offset_right = 150.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="UIManager/PausePanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="PausedLabel" type="Label" parent="UIManager/PausePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="UIManager/PausePanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Resume"
+
+[node name="RestartFromPauseButton" type="Button" parent="UIManager/PausePanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Restart"
+
+[node name="VictoryPanel" type="PanelContainer" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -130.0
+offset_right = 170.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="UIManager/VictoryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="VictoryTitle" type="Label" parent="UIManager/VictoryPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 32
+text = "VICTORY!"
+horizontal_alignment = 1
+
+[node name="VictoryWaveLabel" type="Label" parent="UIManager/VictoryPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "All Waves Cleared!"
+horizontal_alignment = 1
+
+[node name="VictoryGoldLabel" type="Label" parent="UIManager/VictoryPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Final Gold: 0"
+horizontal_alignment = 1
+
+[node name="VictoryHPLabel" type="Label" parent="UIManager/VictoryPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Base HP: 20/20"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UIManager/VictoryPanel/VBox"]
+layout_mode = 2
+
+[node name="EndlessButton" type="Button" parent="UIManager/VictoryPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+text = "Continue (Endless Mode)"
+
+[node name="VictoryRestartButton" type="Button" parent="UIManager/VictoryPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Restart"
+
+[node name="ControlsHint" type="Label" parent="UIManager"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -60.0
+offset_right = 350.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "WASD: Move Hero | Space: Attack | Tab: Build Menu | Esc: Pause
+Click: Place | Right Click: Cancel | Enter: Start Wave
+Controller: LStick Move, RStick Cursor, A Place, X Attack, Y Build"

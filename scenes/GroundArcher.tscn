@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgarcher001"]
+
+[ext_resource type="Script" path="res://scripts/GroundArcher.gd" id="1"]
+
+[node name="GroundArcher" type="Node2D"]
+script = ExtResource("1")
