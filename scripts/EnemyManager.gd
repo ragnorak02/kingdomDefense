@@ -1,5 +1,7 @@
 extends Node
 
+const GameManagerClass = preload("res://scripts/GameManager.gd")
+
 var all_spawned: bool = false
 var _spawn_timer: float = 0.0
 var _enemies_to_spawn: int = 0
@@ -21,7 +23,7 @@ func start_wave(wave_num: int, count: int) -> void:
 	_wave_types = config.get("types", ["goblin"])
 
 func _process(delta: float) -> void:
-	if game_manager.current_phase != GameManager.Phase.WAVE:
+	if game_manager.current_phase != GameManagerClass.Phase.WAVE:
 		return
 	if _enemies_to_spawn <= 0:
 		return

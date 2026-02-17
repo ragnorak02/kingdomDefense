@@ -87,6 +87,33 @@ const HERO_ATTACK_DAMAGE: int = 25
 const HERO_ATTACK_COOLDOWN: float = 0.4
 const HERO_ATTACK_RANGE: float = 40.0
 
+# ── Hero Magic ──
+const HERO_MAX_MANA: int = 100
+const HERO_MANA_REGEN: float = 5.0  # mana per second
+
+enum Spell { FIREBALL, ICE_BLAST }
+
+const SPELL_DATA := {
+	Spell.FIREBALL: {
+		"name": "Fireball",
+		"cost": 30,
+		"damage": 40,
+		"aoe_radius": 50.0,
+		"cooldown": 2.0,
+		"max_range": 300.0,
+		"speed": 250.0,
+	},
+	Spell.ICE_BLAST: {
+		"name": "Ice Blast",
+		"cost": 25,
+		"damage": 15,
+		"aoe_radius": 70.0,
+		"cooldown": 3.0,
+		"slow_factor": 0.4,
+		"slow_duration": 3.0,
+	},
+}
+
 # ── Enemy Types ──
 const ENEMY_TYPES := {
 	"goblin": {"hp_mult": 1.0, "speed_mult": 1.0, "damage": 1, "gold_mult": 1.0, "sprite": "res://assets/enemy.png"},

@@ -15,6 +15,9 @@ var _grid_manager: Node2D
 var _game_manager: Node
 var _repath_timer: float = 0.0
 var _sprite: Sprite2D
+var _slow_factor: float = 1.0
+var _slow_timer: float = 0.0
+var _base_speed: float = 0.0
 
 func setup(wave: int, grid_mgr: Node2D, game_mgr: Node, type: String = "goblin") -> void:
 	_grid_manager = grid_mgr
@@ -25,6 +28,7 @@ func setup(wave: int, grid_mgr: Node2D, game_mgr: Node, type: String = "goblin")
 	max_hp = int(Constants.ENEMY_BASE_HP * type_data["hp_mult"] * (1.0 + Constants.ENEMY_HP_SCALE_PER_WAVE * (wave - 1)))
 	hp = max_hp
 	speed = Constants.ENEMY_BASE_SPEED * type_data["speed_mult"] * (1.0 + Constants.ENEMY_SPEED_SCALE_PER_WAVE * (wave - 1))
+	_base_speed = speed
 	base_damage = type_data["damage"]
 	gold_mult = type_data["gold_mult"]
 	_recalculate_path()
@@ -52,6 +56,15 @@ func _process(delta: float) -> void:
 	# Load correct sprite once (after setup has run)
 	if _sprite and _sprite.texture and _sprite.texture.resource_path == "res://assets/enemy.png" and enemy_type != "goblin":
 		_setup_sprite()
+
+	# Slow timer
+	if _slow_timer > 0:
+		_slow_timer -= delta
+		if _slow_timer <= 0:
+			_slow_factor = 1.0
+			speed = _base_speed
+			if _sprite:
+				_sprite.modulate = Color.WHITE
 
 	if _path.size() == 0:
 		_repath_timer -= delta
@@ -91,14 +104,22 @@ func take_damage(amount: int) -> void:
 	hp -= amount
 	if _sprite:
 		_sprite.modulate = Color(3, 0.5, 0.5)
+		var restore_color := Color(0.5, 0.7, 1.0) if _slow_timer > 0 else Color.WHITE
 		var tween := create_tween()
-		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.15)
+		tween.tween_property(_sprite, "modulate", restore_color, 0.15)
 	if hp <= 0:
 		AudioManager.play("enemy_death")
 		died.emit()
 		queue_free()
 	else:
 		AudioManager.play("enemy_hit")
+
+func apply_slow(factor: float, duration: float) -> void:
+	_slow_factor = factor
+	_slow_timer = duration
+	speed = _base_speed * _slow_factor
+	if _sprite:
+		_sprite.modulate = Color(0.5, 0.7, 1.0)
 
 func _draw() -> void:
 	# HP bar

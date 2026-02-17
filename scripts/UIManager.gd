@@ -1,7 +1,10 @@
 extends CanvasLayer
 
+const GameManagerClass = preload("res://scripts/GameManager.gd")
+
 @onready var game_manager: Node = get_node("../GameManager")
 @onready var build_manager: Node = get_node("../BuildManager")
+@onready var hero: Node2D = get_node("../Hero")
 
 # HUD elements
 @onready var gold_label: Label = %GoldLabel
@@ -23,6 +26,8 @@ extends CanvasLayer
 @onready var break_wave_label: Label = %BreakWaveLabel
 @onready var break_gold_label: Label = %BreakGoldLabel
 @onready var break_hp_label: Label = %BreakHPLabel
+@onready var mana_label: Label = %ManaLabel
+@onready var spell_label: Label = %SpellLabel
 
 # Build buttons
 @onready var wall_btn: Button = %WallButton
@@ -70,6 +75,10 @@ func _ready() -> void:
 	%EndlessButton.pressed.connect(func(): game_manager.continue_endless())
 	%VictoryRestartButton.pressed.connect(func(): game_manager.restart_game())
 
+	# Connect hero signals
+	hero.mana_changed.connect(_on_mana_changed)
+	hero.spell_changed.connect(_on_spell_changed)
+
 	# Init display
 	_on_gold_changed(game_manager.gold)
 	_on_base_hp_changed(game_manager.base_hp)
@@ -113,7 +122,7 @@ func _on_timer_updated(time_left: float) -> void:
 
 func _on_phase_changed(phase: int) -> void:
 	match phase:
-		GameManager.Phase.PLANNING:
+		GameManagerClass.Phase.PLANNING:
 			phase_label.text = "PLANNING PHASE"
 			phase_label.add_theme_color_override("font_color", Color(0.3, 0.9, 0.3))
 			build_panel.visible = true
@@ -123,14 +132,14 @@ func _on_phase_changed(phase: int) -> void:
 			victory_panel.visible = false
 			start_wave_btn.visible = true
 			timer_label.visible = true
-		GameManager.Phase.WAVE:
+		GameManagerClass.Phase.WAVE:
 			phase_label.text = "WAVE IN PROGRESS"
 			phase_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
 			build_panel.visible = false
 			_build_panel_visible = false
 			start_wave_btn.visible = false
 			timer_label.visible = false
-		GameManager.Phase.BREAK:
+		GameManagerClass.Phase.BREAK:
 			phase_label.text = "WAVE COMPLETE!"
 			phase_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
 			build_panel.visible = false
@@ -139,7 +148,7 @@ func _on_phase_changed(phase: int) -> void:
 			break_wave_label.text = "Wave %d Cleared!" % game_manager.current_wave
 			break_gold_label.text = "Gold: %d" % game_manager.gold
 			break_hp_label.text = "Base HP: %d/%d" % [game_manager.base_hp, Constants.BASE_MAX_HP]
-		GameManager.Phase.GAME_OVER:
+		GameManagerClass.Phase.GAME_OVER:
 			phase_label.text = "DEFEAT"
 			phase_label.add_theme_color_override("font_color", Color(0.7, 0.1, 0.1))
 			build_panel.visible = false
@@ -147,7 +156,7 @@ func _on_phase_changed(phase: int) -> void:
 			game_over_panel.visible = true
 			victory_panel.visible = false
 			wave_reached_label.text = "Survived to Wave %d" % game_manager.current_wave
-		GameManager.Phase.VICTORY:
+		GameManagerClass.Phase.VICTORY:
 			phase_label.text = "VICTORY!"
 			phase_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 			build_panel.visible = false
@@ -175,22 +184,22 @@ func _on_item_selected(item: int) -> void:
 		Constants.BuildItem.UPGRADE: upgrade_btn.modulate = Color(0.5, 1, 0.5)
 
 func _update_button_affordability() -> void:
-	var g := game_manager.gold
+	var g: int = game_manager.gold
 	wall_btn.disabled = g < Constants.BUILD_DATA[Constants.BuildItem.WALL]["cost"]
 	rock_btn.disabled = g < Constants.BUILD_DATA[Constants.BuildItem.ROCK]["cost"]
 	tower_btn.disabled = g < Constants.BUILD_DATA[Constants.BuildItem.ARCHER_TOWER]["cost"]
 	archer_btn.disabled = g < Constants.BUILD_DATA[Constants.BuildItem.GROUND_ARCHER]["cost"]
 
 func _update_build_panel_visibility() -> void:
-	if game_manager.current_phase == GameManager.Phase.PLANNING:
+	if game_manager.current_phase == GameManagerClass.Phase.PLANNING:
 		build_panel.visible = _build_panel_visible
 	else:
 		build_panel.visible = false
 
 func _toggle_pause() -> void:
-	if game_manager.current_phase == GameManager.Phase.GAME_OVER:
+	if game_manager.current_phase == GameManagerClass.Phase.GAME_OVER:
 		return
-	if game_manager.current_phase == GameManager.Phase.VICTORY:
+	if game_manager.current_phase == GameManagerClass.Phase.VICTORY:
 		return
 	var is_paused := not get_tree().paused
 	get_tree().paused = is_paused
@@ -200,6 +209,12 @@ func _unpause_and_restart() -> void:
 	get_tree().paused = false
 	pause_panel.visible = false
 	game_manager.restart_game()
+
+func _on_mana_changed(current: int, maximum: int) -> void:
+	mana_label.text = "Mana: %d/%d" % [current, maximum]
+
+func _on_spell_changed(spell_name: String) -> void:
+	spell_label.text = "Spell: %s [Q/E]" % spell_name
 
 func _show_message(msg: String) -> void:
 	message_label.text = msg

@@ -95,6 +95,20 @@ theme_override_colors/font_color = Color(0.5, 1, 0.5, 1)
 theme_override_font_sizes/font_size = 14
 text = "Base: 20/20"
 
+[node name="ManaLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Mana: 100/100"
+
+[node name="SpellLabel" type="Label" parent="UIManager/TopBar/PanelContainer/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "Spell: Fireball [Q/E]"
+
 [node name="BuildPanel" type="PanelContainer" parent="UIManager"]
 unique_name_in_owner = true
 anchors_preset = 3
@@ -375,11 +389,11 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
-offset_top = -60.0
-offset_right = 350.0
+offset_top = -90.0
+offset_right = 480.0
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 10
-text = "WASD: Move Hero | Space: Attack | Tab: Build Menu | Esc: Pause
-Click: Place | RClick: Cancel | Enter: Start Wave | Scroll: Zoom | MClick: Pan
-Controller: LStick Move, RStick Cursor, A Place, X Attack, Y Build"
+theme_override_colors/font_color = Color(0.75, 0.75, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "Keyboard: WASD Move | Space Attack | Q/E Spell Cycle/Cast | Tab Build | Enter Wave | Esc Pause
+Mouse: Click Place | RClick Cancel | Scroll Zoom | MClick Pan
+Controller: LStick Move | RStick Cursor | A Place | X Attack | LB/RB Spell Cycle/Cast | Y Build"

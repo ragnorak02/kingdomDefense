@@ -79,14 +79,19 @@ func _draw() -> void:
 				fill_color = Color(0.32, 0.42, 0.26, 0.8)
 
 			draw_colored_polygon(pts, fill_color)
-			draw_polyline(pts + [pts[0]], Color(0.2, 0.2, 0.15, 0.5), 1.0)
+			draw_polyline(_closed_poly(pts), Color(0.2, 0.2, 0.15, 0.5), 1.0)
 
 	# Draw highlight
 	if Constants.is_in_grid(_highlight_pos.x, _highlight_pos.y):
 		var center := Constants.grid_to_world(_highlight_pos.x, _highlight_pos.y)
 		var pts := _iso_diamond(center)
 		draw_colored_polygon(pts, Color(1, 1, 1, 0.25))
-		draw_polyline(pts + [pts[0]], Color(1, 1, 0.7, 0.8), 2.0)
+		draw_polyline(_closed_poly(pts), Color(1, 1, 0.7, 0.8), 2.0)
+
+func _closed_poly(pts: PackedVector2Array) -> PackedVector2Array:
+	var closed := PackedVector2Array(pts)
+	closed.append(pts[0])
+	return closed
 
 func _iso_diamond(center: Vector2) -> PackedVector2Array:
 	var hw := Constants.TILE_WIDTH * 0.5

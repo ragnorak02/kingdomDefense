@@ -74,6 +74,21 @@ func _ready() -> void:
 	_sounds["select"] = _make_sound([
 		{"type": "sine", "freq": 900.0, "duration": 0.04, "volume": 0.15},
 	])
+	_sounds["fireball_cast"] = _make_sound([
+		{"type": "noise", "freq": 600.0, "duration": 0.06, "volume": 0.3},
+		{"type": "sine", "freq": 350.0, "duration": 0.12, "volume": 0.4},
+		{"type": "sine", "freq": 250.0, "duration": 0.08, "volume": 0.3},
+	])
+	_sounds["fireball_explode"] = _make_sound([
+		{"type": "noise", "freq": 300.0, "duration": 0.15, "volume": 0.5},
+		{"type": "sine", "freq": 120.0, "duration": 0.2, "volume": 0.4},
+		{"type": "noise", "freq": 150.0, "duration": 0.15, "volume": 0.3},
+	])
+	_sounds["ice_blast"] = _make_sound([
+		{"type": "noise", "freq": 2500.0, "duration": 0.08, "volume": 0.3},
+		{"type": "sine", "freq": 1800.0, "duration": 0.1, "volume": 0.3},
+		{"type": "sine", "freq": 1200.0, "duration": 0.15, "volume": 0.2},
+	])
 
 func play(sound_name: String) -> void:
 	if not _sounds.has(sound_name):

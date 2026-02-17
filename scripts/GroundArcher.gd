@@ -54,9 +54,9 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 func _find_closest_enemy() -> Node2D:
-	var enemies := enemy_manager.get_enemies()
+	var enemies = enemy_manager.get_enemies()
 	var closest: Node2D = null
-	var closest_dist := _stats["range"]
+	var closest_dist: float = _stats["range"]
 	for e in enemies:
 		if not is_instance_valid(e):
 			continue

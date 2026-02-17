@@ -1,5 +1,7 @@
 extends Node
 
+const GameManagerClass = preload("res://scripts/GameManager.gd")
+
 var selected_item: int = Constants.BuildItem.NONE
 var _placed_structures: Array[Node2D] = []
 
@@ -31,7 +33,7 @@ func deselect() -> void:
 	item_selected.emit(selected_item)
 
 func _on_tile_clicked(grid_pos: Vector2i) -> void:
-	if game_manager.current_phase != GameManager.Phase.PLANNING:
+	if game_manager.current_phase != GameManagerClass.Phase.PLANNING:
 		return
 	if selected_item == Constants.BuildItem.NONE:
 		return
