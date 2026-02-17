@@ -1,0 +1,14 @@
+{
+  "id": "kingdomdefense",
+  "title": "Korean Fantasy TD",
+  "engine": "godot",
+  "engineVersion": "4.6",
+  "genre": "Tower Defense",
+  "viewport": { "width": 1280, "height": 720 },
+  "entryScene": "res://scenes/Main.tscn",
+  "testCommand": "tests/run-tests.bat",
+  "launch": {
+    "type": "godot",
+    "args": ["--path", "."]
+  }
+}
