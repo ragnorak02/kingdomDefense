@@ -116,10 +116,10 @@ const SPELL_DATA := {
 
 # ── Enemy Types ──
 const ENEMY_TYPES := {
-	"goblin": {"hp_mult": 1.0, "speed_mult": 1.0, "damage": 1, "gold_mult": 1.0, "sprite": "res://assets/enemy.png"},
-	"orc":    {"hp_mult": 2.5, "speed_mult": 0.65, "damage": 2, "gold_mult": 1.5, "sprite": "res://assets/enemy_orc.png"},
-	"swift":  {"hp_mult": 0.5, "speed_mult": 1.8, "damage": 1, "gold_mult": 1.2, "sprite": "res://assets/enemy_swift.png"},
-	"demon":  {"hp_mult": 5.0, "speed_mult": 0.5, "damage": 3, "gold_mult": 3.0, "sprite": "res://assets/enemy_demon.png"},
+	"goblin": {"hp_mult": 1.0, "speed_mult": 1.0, "damage": 1, "gold_mult": 1.0, "sprite": "res://assets/enemy.png", "walk_sheet": "res://assets/goblin_walk.png", "frame_count": 4},
+	"orc":    {"hp_mult": 2.5, "speed_mult": 0.65, "damage": 2, "gold_mult": 1.5, "sprite": "res://assets/enemy_orc.png", "walk_sheet": "res://assets/orc_walk.png", "frame_count": 4},
+	"swift":  {"hp_mult": 0.5, "speed_mult": 1.8, "damage": 1, "gold_mult": 1.2, "sprite": "res://assets/enemy_swift.png", "walk_sheet": "res://assets/swift_walk.png", "frame_count": 4},
+	"demon":  {"hp_mult": 5.0, "speed_mult": 0.5, "damage": 3, "gold_mult": 3.0, "sprite": "res://assets/enemy_demon.png", "walk_sheet": "res://assets/demon_walk.png", "frame_count": 4},
 }
 
 # ── Enemy Stats (base, scaled per wave) ──

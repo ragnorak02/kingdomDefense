@@ -1,0 +1,43 @@
+{
+  "version": "v1",
+  "generated": "2026-02-17",
+  "generator": "generate_sprites_v2.py",
+  "description": "Placeholder sprite manifest — all assets are swap-ready for real art",
+  "assets": {
+    "sprite_sheets": [
+      {"file": "assets/hero_idle.png", "width": 128, "height": 32, "frames": 4, "frame_size": [32, 32], "usage": "Hero idle animation"},
+      {"file": "assets/hero_walk.png", "width": 128, "height": 32, "frames": 4, "frame_size": [32, 32], "usage": "Hero walk animation"},
+      {"file": "assets/hero_attack.png", "width": 96, "height": 32, "frames": 3, "frame_size": [32, 32], "usage": "Hero attack animation"},
+      {"file": "assets/goblin_walk.png", "width": 128, "height": 32, "frames": 4, "frame_size": [32, 32], "usage": "Goblin walk animation"},
+      {"file": "assets/orc_walk.png", "width": 128, "height": 32, "frames": 4, "frame_size": [32, 32], "usage": "Orc walk animation"},
+      {"file": "assets/swift_walk.png", "width": 128, "height": 32, "frames": 4, "frame_size": [32, 32], "usage": "Swift walk animation"},
+      {"file": "assets/demon_walk.png", "width": 128, "height": 32, "frames": 4, "frame_size": [32, 32], "usage": "Demon walk animation"},
+      {"file": "assets/fireball_fly.png", "width": 96, "height": 32, "frames": 3, "frame_size": [32, 32], "usage": "Fireball flying animation"},
+      {"file": "assets/fireball_explode.png", "width": 192, "height": 48, "frames": 4, "frame_size": [48, 48], "usage": "Fireball explosion animation"},
+      {"file": "assets/slash_effect.png", "width": 192, "height": 64, "frames": 3, "frame_size": [64, 64], "usage": "Hero attack slash effect"}
+    ],
+    "tiles": [
+      {"file": "assets/tile_grass_1.png", "width": 64, "height": 32, "usage": "Grid tile — dark green (checkerboard A)"},
+      {"file": "assets/tile_grass_2.png", "width": 64, "height": 32, "usage": "Grid tile — light green (checkerboard B)"},
+      {"file": "assets/tile_spawn.png", "width": 64, "height": 32, "usage": "Grid tile — enemy spawn point"},
+      {"file": "assets/tile_goal.png", "width": 64, "height": 32, "usage": "Grid tile — base/goal point"}
+    ],
+    "static_sprites": [
+      {"file": "assets/hero.png", "width": 32, "height": 32, "usage": "Hero static (legacy, kept for compat)"},
+      {"file": "assets/enemy.png", "width": 32, "height": 32, "usage": "Goblin static (legacy, kept for compat)"},
+      {"file": "assets/enemy_orc.png", "width": 32, "height": 32, "usage": "Orc static (legacy, kept for compat)"},
+      {"file": "assets/enemy_swift.png", "width": 32, "height": 32, "usage": "Swift static (legacy, kept for compat)"},
+      {"file": "assets/enemy_demon.png", "width": 32, "height": 32, "usage": "Demon static (legacy, kept for compat)"},
+      {"file": "assets/archer_tower.png", "width": 32, "height": 48, "usage": "Archer tower (improved v2)"},
+      {"file": "assets/ground_archer.png", "width": 32, "height": 32, "usage": "Ground archer (improved v2)"},
+      {"file": "assets/wall.png", "width": 32, "height": 24, "usage": "Wall block (improved v2)"},
+      {"file": "assets/rock.png", "width": 32, "height": 24, "usage": "Rock block (improved v2)"},
+      {"file": "assets/arrow.png", "width": 16, "height": 16, "usage": "Arrow projectile (improved v2)"}
+    ],
+    "overlays": [
+      {"file": "assets/highlight.png", "width": 64, "height": 32, "usage": "Tile hover highlight (unchanged)"},
+      {"file": "assets/spawn_overlay.png", "width": 64, "height": 32, "usage": "Spawn point overlay (unchanged)"},
+      {"file": "assets/goal_overlay.png", "width": 64, "height": 32, "usage": "Goal point overlay (unchanged)"}
+    ]
+  }
+}

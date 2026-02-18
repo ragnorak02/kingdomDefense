@@ -18,6 +18,13 @@ var _highlight_pos := Vector2i(-1, -1)
 var _controller_cursor := Vector2.ZERO
 var _using_controller := false
 
+# Tile textures
+var _tile_grass_1: Texture2D
+var _tile_grass_2: Texture2D
+var _tile_spawn: Texture2D
+var _tile_goal: Texture2D
+var _tile_highlight: Texture2D
+
 func _ready() -> void:
 	# Set up spawn points (left edge) and goal (right side)
 	spawn_points = [
@@ -27,6 +34,12 @@ func _ready() -> void:
 	]
 	goal_point = Vector2i(Constants.GRID_WIDTH - 1, Constants.GRID_HEIGHT / 2)
 	_controller_cursor = Constants.grid_to_world(Constants.GRID_WIDTH / 2, Constants.GRID_HEIGHT / 2)
+	# Load tile textures
+	_tile_grass_1 = load("res://assets/tile_grass_1.png")
+	_tile_grass_2 = load("res://assets/tile_grass_2.png")
+	_tile_spawn = load("res://assets/tile_spawn.png")
+	_tile_goal = load("res://assets/tile_goal.png")
+	_tile_highlight = load("res://assets/highlight.png")
 	_rebuild_astar()
 
 func _process(_delta: float) -> void:
@@ -60,33 +73,33 @@ func _unhandled_input(event: InputEvent) -> void:
 			tile_clicked.emit(_highlight_pos)
 
 func _draw() -> void:
-	# Draw all grid tiles
+	var hw := Constants.TILE_WIDTH * 0.5
+	var hh := Constants.TILE_HEIGHT * 0.5
+	# Draw all grid tiles using textures
 	for gx in range(Constants.GRID_WIDTH):
 		for gy in range(Constants.GRID_HEIGHT):
 			var center := Constants.grid_to_world(gx, gy)
-			var pts := _iso_diamond(center)
 			var is_spawn := Vector2i(gx, gy) in spawn_points
 			var is_goal := Vector2i(gx, gy) == goal_point
 
-			var fill_color: Color
+			var tile_tex: Texture2D
 			if is_goal:
-				fill_color = Color(0.9, 0.75, 0.2, 0.6)
+				tile_tex = _tile_goal
 			elif is_spawn:
-				fill_color = Color(0.8, 0.2, 0.2, 0.4)
+				tile_tex = _tile_spawn
 			elif (gx + gy) % 2 == 0:
-				fill_color = Color(0.28, 0.38, 0.22, 0.8)
+				tile_tex = _tile_grass_1
 			else:
-				fill_color = Color(0.32, 0.42, 0.26, 0.8)
+				tile_tex = _tile_grass_2
 
-			draw_colored_polygon(pts, fill_color)
-			draw_polyline(_closed_poly(pts), Color(0.2, 0.2, 0.15, 0.5), 1.0)
+			var draw_pos := center - Vector2(hw, hh)
+			draw_texture(tile_tex, draw_pos)
 
 	# Draw highlight
 	if Constants.is_in_grid(_highlight_pos.x, _highlight_pos.y):
 		var center := Constants.grid_to_world(_highlight_pos.x, _highlight_pos.y)
-		var pts := _iso_diamond(center)
-		draw_colored_polygon(pts, Color(1, 1, 1, 0.25))
-		draw_polyline(_closed_poly(pts), Color(1, 1, 0.7, 0.8), 2.0)
+		var draw_pos := center - Vector2(hw, hh)
+		draw_texture(_tile_highlight, draw_pos)
 
 func _closed_poly(pts: PackedVector2Array) -> PackedVector2Array:
 	var closed := PackedVector2Array(pts)

@@ -81,3 +81,18 @@ Per wave: +30% HP, +5% speed. 10 configured waves, infinite scaling beyond.
 - All drawing via `_draw()` + `queue_redraw()`
 - All balance tuning in Constants.gd autoload
 - 1280x720 base resolution, canvas_items stretch
+
+## Dev Log
+
+### 2026-02-17 — Graphics Pass V1
+Upgraded all placeholder visuals from static PNGs + programmatic `_draw()` to animated sprites and textured tiles:
+- **Grid**: Flat colored polygons → textured isometric tile PNGs (grass variants, spawn, goal)
+- **Hero**: Static Sprite2D → AnimatedSprite2D with idle (4f), walk (4f), attack (3f) animations
+- **Enemies**: Static Sprite2D → AnimatedSprite2D with walk (4f) per type (goblin, orc, swift, demon)
+- **Fireball**: Programmatic circles → AnimatedSprite2D with fly (3f) and explode (4f) animations
+- **Attack arc**: Wedge polygon → animated slash sprite (3f crescent arc)
+- **HP bars**: Enhanced with black border, gradient highlight
+- **Upgrade stars**: Circles → 5-pointed star polygons with bright center
+- **Static sprites**: Improved detail/shading on tower, archer, wall, rock, arrow
+- All sprites generated via `generate_sprites_v2.py` (pure Python, no dependencies)
+- All 148 tests pass unchanged — zero gameplay logic modifications

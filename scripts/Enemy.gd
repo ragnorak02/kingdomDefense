@@ -14,10 +14,11 @@ var _path_idx: int = 0
 var _grid_manager: Node2D
 var _game_manager: Node
 var _repath_timer: float = 0.0
-var _sprite: Sprite2D
+var _anim_sprite: AnimatedSprite2D
 var _slow_factor: float = 1.0
 var _slow_timer: float = 0.0
 var _base_speed: float = 0.0
+var _sprite_ready: bool = false
 
 func setup(wave: int, grid_mgr: Node2D, game_mgr: Node, type: String = "goblin") -> void:
 	_grid_manager = grid_mgr
@@ -34,15 +35,30 @@ func setup(wave: int, grid_mgr: Node2D, game_mgr: Node, type: String = "goblin")
 	_recalculate_path()
 
 func _ready() -> void:
-	_sprite = Sprite2D.new()
-	_sprite.texture = load("res://assets/enemy.png")  # Default, overridden in _setup_sprite
-	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_sprite.offset = Vector2(0, -16)
-	add_child(_sprite)
+	_anim_sprite = AnimatedSprite2D.new()
+	_anim_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_anim_sprite.offset = Vector2(0, -16)
+	add_child(_anim_sprite)
 
 func _setup_sprite() -> void:
 	var type_data: Dictionary = Constants.ENEMY_TYPES.get(enemy_type, Constants.ENEMY_TYPES["goblin"])
-	_sprite.texture = load(type_data["sprite"])
+	var walk_sheet: Texture2D = load(type_data["walk_sheet"])
+	var frame_count: int = type_data["frame_count"]
+
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+	frames.add_animation("walk")
+	frames.set_animation_speed("walk", 8.0)
+	frames.set_animation_loop("walk", true)
+	for i in range(frame_count):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = walk_sheet
+		atlas.region = Rect2(i * 32, 0, 32, 32)
+		frames.add_frame("walk", atlas)
+
+	_anim_sprite.sprite_frames = frames
+	_anim_sprite.play("walk")
+	_sprite_ready = true
 
 func _on_grid_changed() -> void:
 	if not is_queued_for_deletion():
@@ -54,7 +70,7 @@ func _recalculate_path() -> void:
 
 func _process(delta: float) -> void:
 	# Load correct sprite once (after setup has run)
-	if _sprite and _sprite.texture and _sprite.texture.resource_path == "res://assets/enemy.png" and enemy_type != "goblin":
+	if not _sprite_ready:
 		_setup_sprite()
 
 	# Slow timer
@@ -63,8 +79,8 @@ func _process(delta: float) -> void:
 		if _slow_timer <= 0:
 			_slow_factor = 1.0
 			speed = _base_speed
-			if _sprite:
-				_sprite.modulate = Color.WHITE
+			if _anim_sprite:
+				_anim_sprite.modulate = Color.WHITE
 
 	if _path.size() == 0:
 		_repath_timer -= delta
@@ -86,8 +102,8 @@ func _process(delta: float) -> void:
 		_path_idx += 1
 	else:
 		position += dir.normalized() * speed * delta
-		if _sprite and abs(dir.x) > 0.1:
-			_sprite.flip_h = dir.x < 0
+		if _anim_sprite and abs(dir.x) > 0.1:
+			_anim_sprite.flip_h = dir.x < 0
 
 	# Periodic repath as fallback
 	_repath_timer -= delta
@@ -102,11 +118,11 @@ func _process(delta: float) -> void:
 
 func take_damage(amount: int) -> void:
 	hp -= amount
-	if _sprite:
-		_sprite.modulate = Color(3, 0.5, 0.5)
+	if _anim_sprite:
+		_anim_sprite.modulate = Color(3, 0.5, 0.5)
 		var restore_color := Color(0.5, 0.7, 1.0) if _slow_timer > 0 else Color.WHITE
 		var tween := create_tween()
-		tween.tween_property(_sprite, "modulate", restore_color, 0.15)
+		tween.tween_property(_anim_sprite, "modulate", restore_color, 0.15)
 	if hp <= 0:
 		AudioManager.play("enemy_death")
 		died.emit()
@@ -118,15 +134,33 @@ func apply_slow(factor: float, duration: float) -> void:
 	_slow_factor = factor
 	_slow_timer = duration
 	speed = _base_speed * _slow_factor
-	if _sprite:
-		_sprite.modulate = Color(0.5, 0.7, 1.0)
+	if _anim_sprite:
+		_anim_sprite.modulate = Color(0.5, 0.7, 1.0)
 
 func _draw() -> void:
-	# HP bar
-	var bar_w := 20.0
-	var bar_h := 3.0
-	var bar_y := -30.0
+	# Enhanced HP bar with border and gradient
+	var bar_w := 22.0
+	var bar_h := 4.0
+	var bar_y := -32.0
 	var hp_ratio := float(hp) / float(max_hp)
-	draw_rect(Rect2(-bar_w / 2, bar_y, bar_w, bar_h), Color(0.2, 0.2, 0.2))
-	var bar_color := Color(0.1, 0.9, 0.1) if hp_ratio > 0.5 else Color(0.9, 0.9, 0.1) if hp_ratio > 0.25 else Color(0.9, 0.1, 0.1)
-	draw_rect(Rect2(-bar_w / 2, bar_y, bar_w * hp_ratio, bar_h), bar_color)
+
+	# Black border
+	draw_rect(Rect2(-bar_w / 2 - 1, bar_y - 1, bar_w + 2, bar_h + 2), Color(0.0, 0.0, 0.0, 0.8))
+	# Background
+	draw_rect(Rect2(-bar_w / 2, bar_y, bar_w, bar_h), Color(0.15, 0.15, 0.15))
+
+	# HP fill color
+	var bar_color: Color
+	if hp_ratio > 0.5:
+		bar_color = Color(0.1, 0.85, 0.1)
+	elif hp_ratio > 0.25:
+		bar_color = Color(0.85, 0.85, 0.1)
+	else:
+		bar_color = Color(0.85, 0.1, 0.1)
+
+	# Main fill
+	var fill_w := bar_w * hp_ratio
+	draw_rect(Rect2(-bar_w / 2, bar_y, fill_w, bar_h), bar_color)
+	# Gradient highlight on top half
+	var highlight := Color(bar_color.r + 0.2, bar_color.g + 0.2, bar_color.b + 0.2, 0.5)
+	draw_rect(Rect2(-bar_w / 2, bar_y, fill_w, bar_h * 0.5), highlight)

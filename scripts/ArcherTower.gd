@@ -76,9 +76,19 @@ func _fire() -> void:
 	AudioManager.play("arrow_fire")
 
 func _draw() -> void:
-	# Draw upgrade stars
+	# Draw upgrade stars (5-pointed star shape)
 	if level >= 2:
 		var star_y := -46.0
 		for i in range(level - 1):
 			var sx := -3.0 + i * 7.0
-			draw_circle(Vector2(sx, star_y), 2.5, Color(1, 0.9, 0.3))
+			_draw_star(Vector2(sx, star_y), 3.5, 1.5, Color(1.0, 0.9, 0.3), Color(1.0, 1.0, 0.8))
+
+func _draw_star(center: Vector2, outer_r: float, inner_r: float, fill_color: Color, bright_color: Color) -> void:
+	var points := PackedVector2Array()
+	for i in range(10):
+		var angle: float = -PI / 2.0 + i * PI / 5.0
+		var r: float = outer_r if i % 2 == 0 else inner_r
+		points.append(center + Vector2(cos(angle), sin(angle)) * r)
+	draw_colored_polygon(points, fill_color)
+	# Bright center dot
+	draw_circle(center, 1.0, bright_color)

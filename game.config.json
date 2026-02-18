@@ -10,5 +10,7 @@
   "launch": {
     "type": "godot",
     "args": ["--path", "."]
-  }
+  },
+  "lastArtUpdate": "2026-02-17",
+  "asset_stage": "placeholder_v1"
 }

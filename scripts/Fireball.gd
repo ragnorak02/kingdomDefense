@@ -8,8 +8,7 @@ var _max_range: float = 300.0
 var _spawn_pos: Vector2
 var _enemy_manager: Node
 var _exploding: bool = false
-var _explode_timer: float = 0.0
-var _explode_radius: float = 0.0
+var _anim_sprite: AnimatedSprite2D
 
 func set_enemy_manager(em: Node) -> void:
 	_enemy_manager = em
@@ -19,13 +18,41 @@ func _ready() -> void:
 	_speed = Constants.SPELL_DATA[Constants.Spell.FIREBALL]["speed"]
 	_max_range = Constants.SPELL_DATA[Constants.Spell.FIREBALL]["max_range"]
 
+	# Create animated sprite with fly and explode animations
+	_anim_sprite = AnimatedSprite2D.new()
+	_anim_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+
+	# Fly animation (3 frames, 10 FPS, looping)
+	frames.add_animation("fly")
+	frames.set_animation_speed("fly", 10.0)
+	frames.set_animation_loop("fly", true)
+	var fly_sheet: Texture2D = load("res://assets/fireball_fly.png")
+	for i in range(3):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = fly_sheet
+		atlas.region = Rect2(i * 32, 0, 32, 32)
+		frames.add_frame("fly", atlas)
+
+	# Explode animation (4 frames, 12 FPS, one-shot)
+	frames.add_animation("explode")
+	frames.set_animation_speed("explode", 12.0)
+	frames.set_animation_loop("explode", false)
+	var explode_sheet: Texture2D = load("res://assets/fireball_explode.png")
+	for i in range(4):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = explode_sheet
+		atlas.region = Rect2(i * 48, 0, 48, 48)
+		frames.add_frame("explode", atlas)
+
+	_anim_sprite.sprite_frames = frames
+	_anim_sprite.play("fly")
+	_anim_sprite.animation_finished.connect(_on_animation_finished)
+	add_child(_anim_sprite)
+
 func _process(delta: float) -> void:
 	if _exploding:
-		_explode_timer -= delta
-		_explode_radius = aoe_radius * (1.0 - _explode_timer / 0.3)
-		queue_redraw()
-		if _explode_timer <= 0:
-			queue_free()
 		return
 
 	# Move in direction
@@ -46,12 +73,10 @@ func _process(delta: float) -> void:
 		_explode()
 		return
 
-	queue_redraw()
-
 func _explode() -> void:
 	_exploding = true
-	_explode_timer = 0.3
 	AudioManager.play("fireball_explode")
+	_anim_sprite.play("explode")
 
 	# AoE damage
 	if _enemy_manager:
@@ -62,19 +87,6 @@ func _explode() -> void:
 			if position.distance_to(enemy.position) <= aoe_radius:
 				enemy.take_damage(damage)
 
-func _draw() -> void:
+func _on_animation_finished() -> void:
 	if _exploding:
-		# Expanding explosion ring
-		var t := _explode_timer / 0.3
-		var alpha := t * 0.7
-		draw_circle(Vector2.ZERO, _explode_radius, Color(1.0, 0.4, 0.1, alpha * 0.4))
-		draw_arc(Vector2.ZERO, _explode_radius, 0, TAU, 24, Color(1.0, 0.6, 0.2, alpha), 2.0)
-		# Inner bright core
-		draw_circle(Vector2.ZERO, _explode_radius * 0.3, Color(1.0, 0.9, 0.3, alpha * 0.6))
-	else:
-		# Flying fireball
-		draw_circle(Vector2.ZERO, 6.0, Color(1.0, 0.5, 0.1, 0.8))
-		draw_circle(Vector2.ZERO, 3.0, Color(1.0, 0.9, 0.3, 0.9))
-		# Trailing glow
-		var trail_dir := -direction.normalized() * 8.0
-		draw_circle(trail_dir, 4.0, Color(1.0, 0.3, 0.0, 0.4))
+		queue_free()

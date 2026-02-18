@@ -6,12 +6,11 @@ signal spell_changed(spell_name: String)
 var _attack_cooldown: float = 0.0
 var _facing := Vector2(1, 0)
 var _attack_anim_timer: float = 0.0
-var _attack_arc_timer: float = 0.0
-var _attack_arc_facing := Vector2(1, 0)
 var _is_attacking: bool = false
+var _is_moving: bool = false
 var _bounds_min: Vector2
 var _bounds_max: Vector2
-var _sprite: Sprite2D
+var _anim_sprite: AnimatedSprite2D
 
 # Magic system
 var _mana: int = Constants.HERO_MAX_MANA
@@ -38,12 +37,49 @@ func _ready() -> void:
 		_bounds_max.x = maxf(_bounds_max.x, c.x)
 		_bounds_max.y = maxf(_bounds_max.y, c.y)
 
-	# Create sprite
-	_sprite = Sprite2D.new()
-	_sprite.texture = load("res://assets/hero.png")
-	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_sprite.offset = Vector2(0, -16)
-	add_child(_sprite)
+	# Create animated sprite
+	_anim_sprite = AnimatedSprite2D.new()
+	_anim_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_anim_sprite.offset = Vector2(0, -16)
+	var frames := SpriteFrames.new()
+	frames.remove_animation("default")
+
+	# Idle animation (4 frames, 4 FPS)
+	frames.add_animation("idle")
+	frames.set_animation_speed("idle", 4.0)
+	frames.set_animation_loop("idle", true)
+	var idle_sheet: Texture2D = load("res://assets/hero_idle.png")
+	for i in range(4):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = idle_sheet
+		atlas.region = Rect2(i * 32, 0, 32, 32)
+		frames.add_frame("idle", atlas)
+
+	# Walk animation (4 frames, 8 FPS)
+	frames.add_animation("walk")
+	frames.set_animation_speed("walk", 8.0)
+	frames.set_animation_loop("walk", true)
+	var walk_sheet: Texture2D = load("res://assets/hero_walk.png")
+	for i in range(4):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = walk_sheet
+		atlas.region = Rect2(i * 32, 0, 32, 32)
+		frames.add_frame("walk", atlas)
+
+	# Attack animation (3 frames, 10 FPS)
+	frames.add_animation("attack")
+	frames.set_animation_speed("attack", 10.0)
+	frames.set_animation_loop("attack", false)
+	var attack_sheet: Texture2D = load("res://assets/hero_attack.png")
+	for i in range(3):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = attack_sheet
+		atlas.region = Rect2(i * 32, 0, 32, 32)
+		frames.add_frame("attack", atlas)
+
+	_anim_sprite.sprite_frames = frames
+	_anim_sprite.play("idle")
+	add_child(_anim_sprite)
 
 	# Init spell cooldowns
 	for spell_key in Constants.SPELL_DATA:
@@ -59,7 +95,8 @@ func _process(delta: float) -> void:
 	input.x = Input.get_axis("move_left", "move_right")
 	input.y = Input.get_axis("move_up", "move_down")
 
-	if input.length() > 0.1:
+	_is_moving = input.length() > 0.1
+	if _is_moving:
 		# Convert to isometric movement
 		var iso_input := Vector2(
 			input.x - input.y,
@@ -69,12 +106,11 @@ func _process(delta: float) -> void:
 		position = position.clamp(_bounds_min, _bounds_max)
 		_facing = iso_input.normalized()
 		# Flip sprite based on horizontal direction
-		_sprite.flip_h = _facing.x < 0
+		_anim_sprite.flip_h = _facing.x < 0
 
 	# Attack cooldown
 	_attack_cooldown -= delta
 	_attack_anim_timer -= delta
-	_attack_arc_timer -= delta
 	if _attack_anim_timer <= 0:
 		_is_attacking = false
 
@@ -103,22 +139,32 @@ func _process(delta: float) -> void:
 		if _spell_cooldowns[spell_key] > 0:
 			_spell_cooldowns[spell_key] -= delta
 
-	# Attack visual feedback
-	_sprite.modulate = Color(1.5, 1.5, 0.8) if _is_attacking else Color.WHITE
+	# Animation state switching
+	if _is_attacking:
+		if _anim_sprite.animation != "attack":
+			_anim_sprite.play("attack")
+		_anim_sprite.modulate = Color(1.5, 1.5, 0.8)
+	elif _is_moving:
+		if _anim_sprite.animation != "walk":
+			_anim_sprite.play("walk")
+		_anim_sprite.modulate = Color.WHITE
+	else:
+		if _anim_sprite.animation != "idle":
+			_anim_sprite.play("idle")
+		_anim_sprite.modulate = Color.WHITE
 
 	# Z-index
 	var gp := Constants.world_to_grid(position)
 	z_index = gp.x + gp.y + 2
 
-	queue_redraw()
-
 func _perform_attack() -> void:
 	_attack_cooldown = Constants.HERO_ATTACK_COOLDOWN
 	_is_attacking = true
-	_attack_anim_timer = 0.2
-	_attack_arc_timer = 0.3
-	_attack_arc_facing = _facing
+	_attack_anim_timer = 0.3
 	AudioManager.play("sword_attack")
+
+	# Spawn slash effect
+	_spawn_slash_effect()
 
 	# Find enemies in range
 	var enemies = enemy_manager.get_enemies()
@@ -129,45 +175,25 @@ func _perform_attack() -> void:
 		if dist <= Constants.HERO_ATTACK_RANGE:
 			enemy.take_damage(Constants.HERO_ATTACK_DAMAGE)
 
-func _draw() -> void:
-	# Attack arc visual
-	if _attack_arc_timer > 0:
-		var t := _attack_arc_timer / 0.3  # 1.0 at start, 0.0 at end
-		var arc_radius := 60.0
-		var arc_angle := PI  # 180 degrees
-		var center_angle := _attack_arc_facing.angle()
-
-		# Sweep: arc opens from narrow to full over first half, then fades
-		var sweep := minf(t * 2.0, 1.0)  # opens quickly
-		var alpha := t * 0.6  # fades out
-
-		var half_arc := arc_angle * 0.5 * sweep
-		var start_angle := center_angle - half_arc
-		var point_count := 16
-		var arc_color := Color(1.0, 0.85, 0.3, alpha)
-		var edge_color := Color(1.0, 0.95, 0.6, alpha * 1.5)
-
-		# Build wedge polygon: center -> arc points
-		var points := PackedVector2Array()
-		points.append(Vector2.ZERO)
-		for i in range(point_count + 1):
-			var angle := start_angle + (half_arc * 2.0) * float(i) / float(point_count)
-			points.append(Vector2(cos(angle), sin(angle)) * arc_radius)
-
-		# Draw filled wedge
-		if points.size() >= 3:
-			var colors := PackedColorArray()
-			for i2 in points.size():
-				colors.append(arc_color)
-			draw_polygon(points, colors)
-
-		# Draw bright edge arc line
-		var edge_points := PackedVector2Array()
-		for i in range(point_count + 1):
-			var angle := start_angle + (half_arc * 2.0) * float(i) / float(point_count)
-			edge_points.append(Vector2(cos(angle), sin(angle)) * arc_radius)
-		if edge_points.size() >= 2:
-			draw_polyline(edge_points, edge_color, 2.0)
+func _spawn_slash_effect() -> void:
+	var slash := AnimatedSprite2D.new()
+	slash.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var slash_frames := SpriteFrames.new()
+	slash_frames.remove_animation("default")
+	slash_frames.add_animation("slash")
+	slash_frames.set_animation_speed("slash", 10.0)
+	slash_frames.set_animation_loop("slash", false)
+	var slash_sheet: Texture2D = load("res://assets/slash_effect.png")
+	for i in range(3):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = slash_sheet
+		atlas.region = Rect2(i * 64, 0, 64, 64)
+		slash_frames.add_frame("slash", atlas)
+	slash.sprite_frames = slash_frames
+	slash.rotation = _facing.angle()
+	slash.animation_finished.connect(slash.queue_free)
+	add_child(slash)
+	slash.play("slash")
 
 # ── Magic System ──
 
