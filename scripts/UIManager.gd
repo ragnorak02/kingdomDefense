@@ -69,7 +69,7 @@ func _ready() -> void:
 	build_manager.item_upgraded.connect(func(_p, lvl): _show_message("Upgraded to Lv.%d!" % lvl))
 	build_manager.item_selected.connect(_on_item_selected)
 
-	# Build buttons
+	# Build buttons (mouse-only, no Godot focus)
 	wall_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.WALL))
 	rock_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.ROCK))
 	tower_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.ARCHER_TOWER))
@@ -77,6 +77,16 @@ func _ready() -> void:
 	remove_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.REMOVE))
 	upgrade_btn.pressed.connect(func(): build_manager.select_item(Constants.BuildItem.UPGRADE))
 	start_wave_btn.pressed.connect(func(): game_manager.start_wave_early())
+
+	# Build buttons must NEVER take Godot focus — left stick must move hero,
+	# A button must place items on grid. D-pad cycling is handled in _unhandled_input.
+	wall_btn.focus_mode = Control.FOCUS_NONE
+	rock_btn.focus_mode = Control.FOCUS_NONE
+	tower_btn.focus_mode = Control.FOCUS_NONE
+	archer_btn.focus_mode = Control.FOCUS_NONE
+	remove_btn.focus_mode = Control.FOCUS_NONE
+	upgrade_btn.focus_mode = Control.FOCUS_NONE
+	start_wave_btn.focus_mode = Control.FOCUS_NONE
 
 	# Break panel buttons
 	%ContinueButton.pressed.connect(func(): game_manager.continue_from_break())
@@ -94,8 +104,8 @@ func _ready() -> void:
 	hero.mana_changed.connect(_on_mana_changed)
 	hero.spell_changed.connect(_on_spell_changed)
 
-	# Set up button focus neighbors for D-pad navigation
-	_setup_focus_neighbors()
+	# Set up focus for popup panels only (game is paused, so focus is fine)
+	_setup_popup_focus()
 
 	# Init display
 	_on_gold_changed(game_manager.gold)
@@ -110,44 +120,41 @@ func _ready() -> void:
 	version_label.text = "v%s" % Constants.BUILD_VERSION
 	_update_build_panel_visibility()
 
-func _setup_focus_neighbors() -> void:
-	# Build panel: vertical chain so D-pad up/down navigates naturally
-	var build_buttons: Array[Button] = [wall_btn, rock_btn, tower_btn, archer_btn, remove_btn, upgrade_btn, start_wave_btn]
-	for i in range(build_buttons.size()):
-		var btn := build_buttons[i]
-		btn.focus_mode = Control.FOCUS_ALL
-		# Wrap top/bottom
-		var prev_btn := build_buttons[(i - 1) % build_buttons.size()]
-		var next_btn := build_buttons[(i + 1) % build_buttons.size()]
-		btn.focus_neighbor_top = prev_btn.get_path()
-		btn.focus_neighbor_bottom = next_btn.get_path()
-		# Prevent focus from escaping left/right
-		btn.focus_neighbor_left = btn.get_path()
-		btn.focus_neighbor_right = btn.get_path()
+func _setup_popup_focus() -> void:
+	# Only popup panels use Godot focus (game is paused during these)
 
-	# Break panel
+	# Break panel — single button
 	var continue_btn: Button = %ContinueButton
 	continue_btn.focus_mode = Control.FOCUS_ALL
 
-	# Game over panel
+	# Game over panel — single button
 	var restart_btn: Button = %RestartButton
 	restart_btn.focus_mode = Control.FOCUS_ALL
 
-	# Pause panel
+	# Pause panel — two buttons
 	var resume_btn: Button = %ResumeButton
 	var restart_pause_btn: Button = %RestartFromPauseButton
 	resume_btn.focus_mode = Control.FOCUS_ALL
 	restart_pause_btn.focus_mode = Control.FOCUS_ALL
 	resume_btn.focus_neighbor_bottom = restart_pause_btn.get_path()
 	restart_pause_btn.focus_neighbor_top = resume_btn.get_path()
+	# Prevent focus escaping
+	resume_btn.focus_neighbor_left = resume_btn.get_path()
+	resume_btn.focus_neighbor_right = resume_btn.get_path()
+	restart_pause_btn.focus_neighbor_left = restart_pause_btn.get_path()
+	restart_pause_btn.focus_neighbor_right = restart_pause_btn.get_path()
 
-	# Victory panel
+	# Victory panel — two buttons
 	var endless_btn: Button = %EndlessButton
 	var victory_restart_btn: Button = %VictoryRestartButton
 	endless_btn.focus_mode = Control.FOCUS_ALL
 	victory_restart_btn.focus_mode = Control.FOCUS_ALL
 	endless_btn.focus_neighbor_bottom = victory_restart_btn.get_path()
 	victory_restart_btn.focus_neighbor_top = endless_btn.get_path()
+	endless_btn.focus_neighbor_left = endless_btn.get_path()
+	endless_btn.focus_neighbor_right = endless_btn.get_path()
+	victory_restart_btn.focus_neighbor_left = victory_restart_btn.get_path()
+	victory_restart_btn.focus_neighbor_right = victory_restart_btn.get_path()
 
 func _process(delta: float) -> void:
 	if _message_timer > 0:
@@ -167,8 +174,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_build"):
 		_build_panel_visible = not _build_panel_visible
 		_update_build_panel_visibility()
+		# Auto-select first build item when opening
 		if _build_panel_visible and build_panel.visible:
-			_grab_build_focus()
+			build_manager.select_item(_build_items[_build_index])
 		get_viewport().set_input_as_handled()
 		return
 
@@ -177,24 +185,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("build_next"):
 			_build_index = (_build_index + 1) % _build_items.size()
 			build_manager.select_item(_build_items[_build_index])
-			_focus_build_button(_build_index)
 			get_viewport().set_input_as_handled()
 			return
 		if event.is_action_pressed("build_prev"):
 			_build_index = (_build_index - 1 + _build_items.size()) % _build_items.size()
 			build_manager.select_item(_build_items[_build_index])
-			_focus_build_button(_build_index)
 			get_viewport().set_input_as_handled()
 			return
-
-func _grab_build_focus() -> void:
-	# Focus the currently selected build button (or first one)
-	_focus_build_button(_build_index)
-
-func _focus_build_button(index: int) -> void:
-	var buttons: Array[Button] = [wall_btn, rock_btn, tower_btn, archer_btn, remove_btn, upgrade_btn]
-	if index >= 0 and index < buttons.size():
-		buttons[index].grab_focus()
 
 func _on_gold_changed(amount: int) -> void:
 	gold_label.text = "Gold: %d" % amount
@@ -224,8 +221,6 @@ func _on_phase_changed(phase: int) -> void:
 			victory_panel.visible = false
 			start_wave_btn.visible = true
 			timer_label.visible = true
-			# Auto-focus build panel for controller
-			call_deferred("_grab_build_focus")
 		GameManagerClass.Phase.WAVE:
 			phase_label.text = "WAVE IN PROGRESS"
 			phase_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
@@ -233,7 +228,6 @@ func _on_phase_changed(phase: int) -> void:
 			_build_panel_visible = false
 			start_wave_btn.visible = false
 			timer_label.visible = false
-			# Release focus so controller inputs go to gameplay
 			_release_ui_focus()
 		GameManagerClass.Phase.BREAK:
 			phase_label.text = "WAVE COMPLETE!"
@@ -244,7 +238,6 @@ func _on_phase_changed(phase: int) -> void:
 			break_wave_label.text = "Wave %d Cleared!" % game_manager.current_wave
 			break_gold_label.text = "Gold: %d" % game_manager.gold
 			break_hp_label.text = "Base HP: %d/%d" % [game_manager.base_hp, Constants.BASE_MAX_HP]
-			# Focus continue button for controller
 			call_deferred("_focus_break_panel")
 		GameManagerClass.Phase.GAME_OVER:
 			phase_label.text = "DEFEAT"
@@ -254,7 +247,6 @@ func _on_phase_changed(phase: int) -> void:
 			game_over_panel.visible = true
 			victory_panel.visible = false
 			wave_reached_label.text = "Survived to Wave %d" % game_manager.current_wave
-			# Focus restart button for controller
 			call_deferred("_focus_game_over_panel")
 		GameManagerClass.Phase.VICTORY:
 			phase_label.text = "VICTORY!"
@@ -266,7 +258,6 @@ func _on_phase_changed(phase: int) -> void:
 			%VictoryWaveLabel.text = "All %d Waves Cleared!" % Constants.FINAL_WAVE
 			%VictoryGoldLabel.text = "Final Gold: %d" % game_manager.gold
 			%VictoryHPLabel.text = "Base HP: %d/%d" % [game_manager.base_hp, Constants.BASE_MAX_HP]
-			# Focus endless button for controller
 			call_deferred("_focus_victory_panel")
 
 func _focus_break_panel() -> void:
@@ -279,13 +270,12 @@ func _focus_victory_panel() -> void:
 	%EndlessButton.grab_focus()
 
 func _release_ui_focus() -> void:
-	# Remove focus from any UI button so controller goes back to gameplay
 	var focused := get_viewport().gui_get_focus_owner()
 	if focused:
 		focused.release_focus()
 
 func _on_item_selected(item: int) -> void:
-	# Highlight selected button
+	# Visual highlight only — no Godot focus
 	wall_btn.modulate = Color.WHITE
 	rock_btn.modulate = Color.WHITE
 	tower_btn.modulate = Color.WHITE
@@ -336,11 +326,7 @@ func _toggle_pause() -> void:
 	if is_paused:
 		call_deferred("_focus_pause_panel")
 	else:
-		# Return focus to build panel if in planning
-		if _build_panel_visible and build_panel.visible:
-			call_deferred("_grab_build_focus")
-		else:
-			_release_ui_focus()
+		_release_ui_focus()
 
 func _focus_pause_panel() -> void:
 	%ResumeButton.grab_focus()
