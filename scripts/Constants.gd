@@ -1,5 +1,17 @@
 extends Node
 
+# ── Build Info ──
+const BUILD_VERSION := "0.3.1"
+
+# ── Debug Flags ──
+const DEBUG_PHASES := false
+const DEBUG_PATH := false
+const DEBUG_BUILD := false
+const DEBUG_COMBAT := false
+const DEBUG_SPAWNS := false
+const DEBUG_UI := false
+const DEBUG_AUDIO := false
+
 # ── Grid Settings ──
 const GRID_WIDTH: int = 20
 const GRID_HEIGHT: int = 14

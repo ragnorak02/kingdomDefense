@@ -47,6 +47,8 @@ func start_planning_phase() -> void:
 	current_phase = Phase.PLANNING
 	plan_timer = Constants.PLAN_PHASE_DURATION
 	_gold_accumulator = 0.0
+	if Constants.DEBUG_PHASES:
+		print("[Phase] PLANNING started — wave %d complete" % current_wave)
 	phase_changed.emit(current_phase)
 
 func start_wave_early() -> void:
@@ -59,6 +61,8 @@ func start_wave_early() -> void:
 func start_wave() -> void:
 	current_phase = Phase.WAVE
 	current_wave += 1
+	if Constants.DEBUG_PHASES:
+		print("[Phase] WAVE %d started — gold: %d, base HP: %d" % [current_wave, gold, base_hp])
 	wave_changed.emit(current_wave)
 	phase_changed.emit(current_phase)
 	AudioManager.play("wave_start")
@@ -92,6 +96,8 @@ func _wave_complete() -> void:
 	# Wave completion gold bonus
 	gold += 50 + current_wave * 20
 	gold_changed.emit(gold)
+	if Constants.DEBUG_PHASES:
+		print("[Phase] Wave %d complete — gold: %d, base HP: %d" % [current_wave, gold, base_hp])
 
 	if current_wave >= Constants.FINAL_WAVE:
 		current_phase = Phase.VICTORY
@@ -103,6 +109,8 @@ func _wave_complete() -> void:
 
 func _game_over() -> void:
 	current_phase = Phase.GAME_OVER
+	if Constants.DEBUG_PHASES:
+		print("[Phase] GAME_OVER — wave %d, base HP: %d" % [current_wave, base_hp])
 	AudioManager.play("game_over")
 	phase_changed.emit(current_phase)
 

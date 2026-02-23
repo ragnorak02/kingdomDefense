@@ -167,6 +167,8 @@ func _rebuild_astar() -> void:
 			# Down
 			if gy + 1 < Constants.GRID_HEIGHT:
 				_astar.connect_points(pid, _point_id(gx, gy + 1))
+	if Constants.DEBUG_PATH:
+		print("[Path] AStar rebuilt — %d points" % _astar.get_point_count())
 	grid_changed.emit()
 
 func get_path_to_goal(from_world: Vector2) -> PackedVector2Array:
@@ -203,6 +205,8 @@ func would_block_path(gp: Vector2i) -> bool:
 	_astar.set_point_disabled(pid, true)
 	var still_has_path := has_path_from_spawns()
 	_astar.set_point_disabled(pid, false)
+	if Constants.DEBUG_PATH and not still_has_path:
+		print("[Path] would_block_path TRUE at %s" % gp)
 	return not still_has_path
 
 func clear_all_occupancy() -> void:

@@ -71,6 +71,8 @@ func _try_place(grid_pos: Vector2i, item: int) -> void:
 	var structure := _create_structure(grid_pos, item)
 	grid_manager.set_occupied(grid_pos, item, structure)
 	_placed_structures.append(structure)
+	if Constants.DEBUG_BUILD:
+		print("[Build] Placed %s at %s — cost: %d" % [data["name"], grid_pos, data["cost"]])
 	item_placed.emit(item, grid_pos)
 	AudioManager.play("build_place")
 
@@ -89,6 +91,8 @@ func _try_remove(grid_pos: Vector2i) -> void:
 	if node and is_instance_valid(node):
 		_placed_structures.erase(node)
 		node.queue_free()
+	if Constants.DEBUG_BUILD:
+		print("[Build] Removed at %s — refund: %d" % [grid_pos, refund])
 	item_removed.emit(grid_pos)
 	AudioManager.play("build_remove")
 
@@ -126,6 +130,8 @@ func _try_upgrade(grid_pos: Vector2i) -> void:
 
 	game_manager.spend_gold(cost)
 	node.upgrade()
+	if Constants.DEBUG_BUILD:
+		print("[Build] Upgraded at %s to Lv.%d — cost: %d" % [grid_pos, node.level, cost])
 	item_upgraded.emit(grid_pos, node.level)
 
 func _create_structure(grid_pos: Vector2i, item: int) -> Node2D:

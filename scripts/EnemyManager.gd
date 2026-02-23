@@ -21,6 +21,8 @@ func start_wave(wave_num: int, count: int) -> void:
 	# Get wave types
 	var config := Constants.get_wave_config(wave_num)
 	_wave_types = config.get("types", ["goblin"])
+	if Constants.DEBUG_SPAWNS:
+		print("[Spawn] Wave %d — %d enemies, types: %s" % [wave_num, count, _wave_types])
 
 func _process(delta: float) -> void:
 	if game_manager.current_phase != GameManagerClass.Phase.WAVE:
@@ -52,6 +54,8 @@ func _spawn_enemy() -> void:
 	enemy.reached_goal.connect(_on_enemy_reached_goal.bind(enemy))
 	enemy_container.add_child(enemy)
 	_active_enemies.append(enemy)
+	if Constants.DEBUG_SPAWNS:
+		print("[Spawn] %s at spawn %s — active: %d" % [etype, sp, _active_enemies.size()])
 
 func _on_enemy_died(enemy: Node2D) -> void:
 	_active_enemies.erase(enemy)

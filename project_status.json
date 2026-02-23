@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "gameId": "kingdomdefense",
   "title": "Korean Fantasy TD",
-  "lastUpdated": "2026-02-18T00:00:00Z",
+  "lastUpdated": "2026-02-22T00:00:00Z",
   "health": {
-    "progressPercent": 55,
-    "buildVersion": "0.3.0",
+    "progressPercent": 62,
+    "buildVersion": "0.3.1",
     "assetStage": "placeholder"
   },
   "tech": {

@@ -28,6 +28,7 @@ const GameManagerClass = preload("res://scripts/GameManager.gd")
 @onready var break_hp_label: Label = %BreakHPLabel
 @onready var mana_label: Label = %ManaLabel
 @onready var spell_label: Label = %SpellLabel
+@onready var version_label: Label = %VersionLabel
 
 # Build buttons
 @onready var wall_btn: Button = %WallButton
@@ -89,6 +90,7 @@ func _ready() -> void:
 	pause_panel.visible = false
 	victory_panel.visible = false
 	message_label.text = ""
+	version_label.text = "v%s" % Constants.BUILD_VERSION
 	_update_build_panel_visibility()
 
 func _process(delta: float) -> void:

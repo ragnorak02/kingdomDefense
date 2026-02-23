@@ -397,3 +397,19 @@ theme_override_font_sizes/font_size = 16
 text = "Keyboard: WASD Move | Space Attack | Q/E Spell Cycle/Cast | Tab Build | Enter Wave | Esc Pause
 Mouse: Click Place | RClick Cancel | Scroll Zoom | MClick Pan
 Controller: LStick Move | RStick Cursor | A Place | X Attack | LB/RB Spell Cycle/Cast | Y Build"
+
+[node name="VersionLabel" type="Label" parent="UIManager"]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 0.6)
+theme_override_font_sizes/font_size = 11
+text = "v0.3.0"
+horizontal_alignment = 2
